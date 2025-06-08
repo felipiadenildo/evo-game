@@ -18,7 +18,7 @@ public class AISystem extends GameSystem {
 
     private final GameMap gameMap;
     private final Random random = new Random();
-    private Entity playerEntityCache; // Cache for the player entity to avoid repeated lookups
+    private Entity playerEntityCache; // Cache for the player entity to avoid repeated lookups per frame
 
     public AISystem(World world, GameMap gameMap) {
         super(world);
@@ -32,39 +32,38 @@ public class AISystem extends GameSystem {
     public void update() {
         // Find the player entity once per frame for all NPCs to reference
         this.playerEntityCache = findPlayer();
-        if (this.playerEntityCache == null) {
-            // If there is no player, NPCs can just wander
-        }
-
+        
         Set<Entity> npcs = world.getEntitiesWithComponent(NpcComponent.class);
         long currentTime = System.currentTimeMillis();
 
         for (Entity npc : npcs) {
+            // Get all necessary components for the NPC
             AiComponent ai = world.getComponent(npc, AiComponent.class);
-            if (ai == null) continue;
+            EcologyComponent ecology = world.getComponent(npc, EcologyComponent.class);
+            ProceduralSpriteComponent sprite = world.getComponent(npc, ProceduralSpriteComponent.class);
+            
+            if (ai == null || ecology == null || sprite == null) continue;
 
             // Check timing to control movement speed
             if (currentTime - ai.lastMoveTime < ai.moveDelay) {
-                world.getComponent(npc, ProceduralSpriteComponent.class).isMoving = false;
-                continue;
+                sprite.isMoving = false; // If not moving, ensure animation state is idle
+                continue; 
             }
             ai.lastMoveTime = currentTime;
+            sprite.isMoving = true; // Assume movement will happen unless it stands still
 
             // Decide which action to take based on temperament
-            EcologyComponent ecology = world.getComponent(npc, EcologyComponent.class);
-            if (ecology != null) {
-                switch (ecology.temperament) {
-                    case AGGRESSIVE:
-                        handleAggressive(npc);
-                        break;
-                    case SKITTISH:
-                        handleSkittish(npc);
-                        break;
-                    case NEUTRAL:
-                    default:
-                        handleNeutral(npc);
-                        break;
-                }
+            switch (ecology.temperament) {
+                case AGGRESSIVE:
+                    handleAggressive(npc);
+                    break;
+                case SKITTISH:
+                    handleSkittish(npc);
+                    break;
+                case NEUTRAL:
+                default:
+                    handleNeutral(npc);
+                    break;
             }
         }
     }
@@ -75,13 +74,23 @@ public class AISystem extends GameSystem {
     private void handleAggressive(Entity npc) {
         PositionComponent npcPos = world.getComponent(npc, PositionComponent.class);
         PositionComponent playerPos = (playerEntityCache != null) ? world.getComponent(playerEntityCache, PositionComponent.class) : null;
+        
         int detectionRange = 8; // How many tiles away the NPC can "see" the player
+        int attackRange = 1; // How close it needs to be to attack
 
-        // If player exists and is within range, chase them
         if (playerPos != null && isWithinDistance(npcPos, playerPos, detectionRange)) {
-            moveTowards(npc, playerPos);
+            // If right next to the player, try to attack
+            if (isWithinDistance(npcPos, playerPos, attackRange)) {
+                if (!world.hasComponent(npc, WantsToAttackComponent.class)) {
+                    world.addComponent(npc, new WantsToAttackComponent());
+                }
+                world.getComponent(npc, ProceduralSpriteComponent.class).isMoving = false; // Stop moving to attack
+            } else {
+                // Otherwise, move towards the player
+                moveTowards(npc, playerPos);
+            }
         } else {
-            // Otherwise, just wander around
+            // If player is not in range, just wander around
             handleNeutral(npc);
         }
     }
@@ -94,11 +103,9 @@ public class AISystem extends GameSystem {
         PositionComponent playerPos = (playerEntityCache != null) ? world.getComponent(playerEntityCache, PositionComponent.class) : null;
         int fleeRange = 6; // How close the player has to be to scare the NPC
 
-        // If player exists and is too close, run away
         if (playerPos != null && isWithinDistance(npcPos, playerPos, fleeRange)) {
             moveAwayFrom(npc, playerPos);
         } else {
-            // Otherwise, just wander around calmly
             handleNeutral(npc);
         }
     }
@@ -107,54 +114,98 @@ public class AISystem extends GameSystem {
      * Handles NEUTRAL behavior: wander randomly.
      */
     private void handleNeutral(Entity npc) {
-        PositionComponent position = world.getComponent(npc, PositionComponent.class);
-        DirectionComponent direction = world.getComponent(npc, DirectionComponent.class);
-        ProceduralSpriteComponent sprite = world.getComponent(npc, ProceduralSpriteComponent.class);
-        if (position == null || direction == null || sprite == null) return;
-        
-        sprite.isMoving = true; // Attempt to move
-
+        // This is a simple random walk
         int moveChoice = random.nextInt(5); // 0-3 for movement, 4 for standing still
-        int targetRow = position.row;
-        int targetCol = position.column;
-
-        switch (moveChoice) {
-            case 0: targetRow--; direction.facing = DirectionComponent.Direction.UP; break;
-            case 1: targetRow++; direction.facing = DirectionComponent.Direction.DOWN; break;
-            case 2: targetCol--; direction.facing = DirectionComponent.Direction.LEFT; break;
-            case 3: targetCol++; direction.facing = DirectionComponent.Direction.RIGHT; break;
-            default: sprite.isMoving = false; return; // Stand still
+        if (moveChoice == 4) {
+            world.getComponent(npc, ProceduralSpriteComponent.class).isMoving = false;
+            return;
         }
-
-        if (CollisionUtil.isPositionOpen(world, gameMap, targetRow, targetCol, npc)) {
-            position.row = targetRow;
-            position.column = targetCol;
-        }
+        
+        DirectionComponent.Direction moveDirection = DirectionComponent.Direction.values()[moveChoice];
+        moveInDirection(npc, moveDirection);
     }
 
     // --- Helper Methods for AI Movement ---
 
+    /**
+     * Calculates the best single step to take to get closer to a target position.
+     */
     private void moveTowards(Entity npc, PositionComponent targetPos) {
-        // ... (Implement logic to move one step closer to targetPos)
+        PositionComponent npcPos = world.getComponent(npc, PositionComponent.class);
+        if (npcPos == null) return;
+
+        int dr = targetPos.row - npcPos.row;
+        int dc = targetPos.column - npcPos.column;
+
+        // Move along the axis with the greatest distance first to close the gap
+        if (Math.abs(dr) > Math.abs(dc)) {
+            moveInDirection(npc, dr > 0 ? DirectionComponent.Direction.DOWN : DirectionComponent.Direction.UP);
+        } else if (dc != 0) { // Check dc != 0 to avoid standing still if on same column
+            moveInDirection(npc, dc > 0 ? DirectionComponent.Direction.RIGHT : DirectionComponent.Direction.LEFT);
+        } else { // Already on the same column, move vertically
+            moveInDirection(npc, dr > 0 ? DirectionComponent.Direction.DOWN : DirectionComponent.Direction.UP);
+        }
     }
 
+    /**
+     * Calculates the best single step to take to get further away from a target position.
+     */
     private void moveAwayFrom(Entity npc, PositionComponent targetPos) {
-        // ... (Implement logic to move one step further from targetPos)
+        PositionComponent npcPos = world.getComponent(npc, PositionComponent.class);
+        if (npcPos == null) return;
+
+        int dr = npcPos.row - targetPos.row;
+        int dc = npcPos.column - targetPos.column;
+        
+        // Move along the axis that creates the most distance
+        if (Math.abs(dr) > Math.abs(dc)) {
+            moveInDirection(npc, dr > 0 ? DirectionComponent.Direction.DOWN : DirectionComponent.Direction.UP);
+        } else if (dc != 0) {
+            moveInDirection(npc, dc > 0 ? DirectionComponent.Direction.RIGHT : DirectionComponent.Direction.LEFT);
+        } else { // Flee vertically if on same column
+             moveInDirection(npc, dr > 0 ? DirectionComponent.Direction.DOWN : DirectionComponent.Direction.UP);
+        }
+    }
+
+    /**
+     * Tries to move an entity one step in a given direction after checking for collisions.
+     * @param entity The entity to move.
+     * @param direction The direction to move in.
+     */
+    private void moveInDirection(Entity entity, DirectionComponent.Direction direction) {
+        PositionComponent position = world.getComponent(entity, PositionComponent.class);
+        DirectionComponent dirComponent = world.getComponent(entity, DirectionComponent.class);
+        if (position == null || dirComponent == null) return;
+        
+        dirComponent.facing = direction; // Update direction component regardless of successful move
+        
+        int targetRow = position.row;
+        int targetCol = position.column;
+        
+        switch (direction) {
+            case UP:    targetRow--; break;
+            case DOWN:  targetRow++; break;
+            case LEFT:  targetCol--; break;
+            case RIGHT: targetCol++; break;
+        }
+
+        if (CollisionUtil.isPositionOpen(world, gameMap, targetRow, targetCol, entity)) {
+            position.row = targetRow;
+            position.column = targetCol;
+        } else {
+             // If move failed, it's not in a "moving" state for animation
+             world.getComponent(entity, ProceduralSpriteComponent.class).isMoving = false;
+        }
     }
 
     private boolean isWithinDistance(PositionComponent pos1, PositionComponent pos2, int distance) {
         if (pos1 == null || pos2 == null) return false;
-        int dr = Math.abs(pos1.row - pos2.row);
-        int dc = Math.abs(pos1.column - pos2.column);
         // Using Manhattan distance for simplicity and performance on a grid
-        return (dr + dc) <= distance;
+        return (Math.abs(pos1.row - pos2.row) + Math.abs(pos1.column - pos2.column)) <= distance;
     }
 
     private Entity findPlayer() {
         Set<Entity> players = world.getEntitiesWithComponent(PlayerControlledComponent.class);
-        if (!players.isEmpty()) {
-            return players.iterator().next();
-        }
-        return null;
+        return players.isEmpty() ? null : players.iterator().next();
     }
 }
