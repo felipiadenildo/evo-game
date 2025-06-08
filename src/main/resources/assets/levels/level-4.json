@@ -1,0 +1,50 @@
+{
+  "levelNumber": 1,
+  "levelName": "The Tidal Pool",
+  "proceduralSeed": 12345,
+  "mapWidth": 60,
+  "mapHeight": 50,
+  "noiseScale": 500.0,
+  "player": {
+    "row": 25,
+    "column": 30,
+    "lives": 3,
+    "properties": {
+      "size": 3,
+      "diet": "OMNIVORE",
+      "bodyType": "FINNED_AQUATIC"
+    }
+  },
+  "biomeRules": [
+    {
+      "biome": "OCEAN_SHALLOW",
+      "spawnables": [
+        {
+          "type": "SkittishNPC",
+          "density": 0.5,
+          "properties": {
+            "size": 2,
+            "speed": 1.8,
+            "bodyType": "FINNED_AQUATIC",
+            "diet": "HERBIVORE"
+          }
+        }
+      ]
+    },
+    {
+      "biome": "FOREST",
+      "spawnables": [
+        {
+          "type": "AggressiveNPC",
+          "density": 0.015,
+          "properties": {
+            "size": 4,
+            "speed": 1.5,
+            "bodyType": "BIPED_TERRESTRIAL",
+            "diet": "CARNIVORE"
+          }
+        }
+      ]
+    }
+  ]
+}
