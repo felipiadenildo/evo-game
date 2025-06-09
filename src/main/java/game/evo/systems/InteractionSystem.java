@@ -8,6 +8,7 @@ import game.evo.components.PositionComponent;
 import game.evo.components.StatusComponent;
 import game.evo.components.PortalComponent;
 import game.evo.components.GoToNextLevelComponent;
+import game.evo.components.NotificationComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,30 +66,44 @@ public class InteractionSystem extends GameSystem {
     }
 
     /**
-     * Handles the logic for a player consuming a food item.
-     * @param player The player entity.
-     * @param foodItem The food entity being consumed.
-     */
-    private void eatFood(Entity player, Entity foodItem) {
-        StatusComponent playerStatus = world.getComponent(player, StatusComponent.class);
-        FoodComponent foodData = world.getComponent(foodItem, FoodComponent.class);
+ * Lida com a lógica para um jogador consumir um item alimentar.
+ * MODIFICADO: Agora diferencia entre comida normal e venenosa.
+ * @param player O jogador.
+ * @param foodItem O item alimentar a ser consumido.
+ */
+private void eatFood(Entity player, Entity foodItem) {
+    StatusComponent playerStatus = world.getComponent(player, StatusComponent.class);
+    FoodComponent foodData = world.getComponent(foodItem, FoodComponent.class);
 
-        if (playerStatus == null || foodData == null) {
-            System.err.println("[WARN InteractionSystem] Player or Food is missing required components for interaction.");
-            return;
-        }
+    if (playerStatus == null || foodData == null) {
+        System.err.println("[WARN InteractionSystem] Player or Food is missing required components for interaction.");
+        return;
+    }
 
-        // Add nutrition value to player's evolution points
-        playerStatus.evolutionPoints += foodData.nutritionValue;
+    // Verifica se o alimento é venenoso 
+    if (foodData.isPoisonous) {
+        // Causa dano em vez de curar
+        int damage = foodData.nutritionValue; // "nutrition" aqui representa a potência do veneno
+        playerStatus.health -= damage;
+        System.out.println("[INFO GAME] Player ate something poisonous! Lost " + damage + " health.");
         
-        // Optional: Regenerate health upon eating
-        // playerStatus.health = Math.min(playerStatus.maxHealth, playerStatus.health + foodData.nutritionValue);
+        // Adiciona uma notificação na tela para o jogador
+        world.addComponent(player, new NotificationComponent("You ate something poisonous!", 3.0f));
+
+    } else {
+        // Comida normal: adiciona pontos de evolução e regenera vida
+        playerStatus.evolutionPoints += foodData.nutritionValue;
+        playerStatus.health = Math.min(playerStatus.maxHealth, playerStatus.health + foodData.nutritionValue);
 
         System.out.println("[INFO GAME] Player ate food! Gained " + foodData.nutritionValue + " evolution points. Total: " + playerStatus.evolutionPoints);
-
-        // Remove the food item from the world
-        world.destroyEntity(foodItem);
+        
+        // Adiciona uma notificação positiva
+        world.addComponent(player, new NotificationComponent("Yummy! +" + foodData.nutritionValue + " points.", 2.0f));
     }
+
+    // Remove o item do mundo após a interação, seja ele venenoso ou não
+    world.destroyEntity(foodItem);
+}
 
     /**
      * Handles the logic for a player entering a portal.

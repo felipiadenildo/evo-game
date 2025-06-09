@@ -10,9 +10,18 @@ import java.io.Serializable;
 public class FoodComponent implements Component , Serializable { // << 2. ADICIONE 'implements Serializable'
 
     private static final long serialVersionUID = 1L; 
-    public int nutritionValue; // How much this food contributes to evolution
+    public int nutritionValue; // Quanto este alimento contribui (ou prejudica)
+    public boolean isPoisonous; // <-- ADICIONADO: Define se o alimento causa dano
 
+    // Construtor padrão para comida não venenosa (mantém a compatibilidade)
     public FoodComponent(int nutritionValue) {
         this.nutritionValue = nutritionValue;
+        this.isPoisonous = false;
+    }
+
+    // <-- ADICIONADO: Novo construtor para definir se é venenoso
+    public FoodComponent(int nutritionValue, boolean isPoisonous) {
+        this.nutritionValue = nutritionValue;
+        this.isPoisonous = isPoisonous;
     }
 }

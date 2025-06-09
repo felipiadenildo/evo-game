@@ -1,85 +1,124 @@
 package game.evo.world;
 
+import game.evo.components.CollisionComponent;
+import game.evo.components.PositionComponent;
+import game.evo.config.LevelConfig;
 import game.evo.ecs.Entity;
 import game.evo.ecs.World;
-import game.evo.components.PositionComponent;
-import game.evo.components.CollisionComponent; // Import para criar obstáculos
 import game.evo.utils.GameConstants;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 /**
- * Manages the game map by orchestrating procedural generation and storing
- * both the visual map image and the logical grid for gameplay mechanics.
+ * Gerencia o mapa do jogo, orquestrando a geração procedural e o armazenamento
+ * da imagem visual e da grade lógica.
+ * REFATORADO: Agora implementa um sistema de cache para acelerar o carregamento.
  */
 public class GameMap {
     private final int widthInTiles;
     private final int heightInTiles;
     private final World world;
 
-    private final TileType[][] logicalGrid;
-    private final BufferedImage mapImage;
+    private TileType[][] logicalGrid;
+    private BufferedImage mapImage;
 
     /**
-     * Constructs and generates a procedural GameMap.
-     * @param widthInTiles The width of the map in logical tiles.
-     * @param heightInTiles The height of the map in logical tiles.
-     * @param world The ECS World instance to populate with special tile entities.
-     * @param seed The seed for procedural generation.
-     * @param noiseScale The "zoom" level for the procedural noise.
+     * Constrói e gera um GameMap.
+     * Primeiro, tenta carregar o mapa de um arquivo de cache. Se não encontrar,
+     * gera um novo mapa proceduralmente e o salva em cache para uso futuro.
+     * @param world A instância do mundo ECS.
+     * @param config A configuração completa do nível, contendo a seed e outras informações.
      */
-    public GameMap(int widthInTiles, int heightInTiles, World world, long seed, double noiseScale) {
-        if (world == null) {
-            throw new IllegalArgumentException("World instance cannot be null for GameMap initialization.");
+    public GameMap(World world, LevelConfig config) {
+        if (world == null || config == null) {
+            throw new IllegalArgumentException("World e LevelConfig não podem ser nulos para a inicialização do GameMap.");
         }
-        this.widthInTiles = widthInTiles;
-        this.heightInTiles = heightInTiles;
+        this.widthInTiles = config.mapWidth;
+        this.heightInTiles = config.mapHeight;
         this.world = world;
 
-        // 1. Create a MapGenerator and generate the map data
-        MapGenerator generator = new MapGenerator(seed);
-        generator.generate(widthInTiles, heightInTiles, GameConstants.CELL_SIZE, noiseScale);
-        
-        // 2. Store the generated data
-        this.logicalGrid = generator.getLogicalGrid();
-        this.mapImage = generator.getMapImage();
+        // --- LÓGICA DE CACHE ---
+        String cacheFileName = "cache/map_seed_" + config.proceduralSeed + ".png";
+        File cacheFile = new File(cacheFileName);
 
-        // 3. Create ECS entities ONLY for special, non-walkable tiles that need collision
+        if (cacheFile.exists() && !GameConstants.DEBUG_MODE_ON) { // O cache é ignorado em modo debug para forçar a regeneração
+            System.out.println("[INFO GameMap] Loading map from cache file: " + cacheFileName);
+            try {
+                // Carrega a imagem do mapa diretamente do arquivo de cache
+                this.mapImage = ImageIO.read(cacheFile);
+
+                // A grade lógica ainda precisa ser gerada para colisões e biomas
+                MapGenerator logicalGenerator = new MapGenerator(config);
+                this.logicalGrid = logicalGenerator.generateLogicalGridOnly(config.mapWidth, config.mapHeight, config.noiseScale);
+
+            } catch (IOException e) {
+                System.err.println("Failed to load map from cache. Regenerating...");
+                generateAndCacheMap(config);
+            }
+        } else {
+            System.out.println("[INFO GameMap] No cache found or debug mode is on. Generating new map...");
+            generateAndCacheMap(config);
+        }
+
         createEntitiesForSpecialTiles();
     }
     
+    
     /**
-     * Iterates through the generated logical grid and creates ECS entities
-     * for any tiles that are not walkable, so they can be part of the collision system.
+     * Método auxiliar que centraliza a lógica de gerar um novo mapa e salvá-lo em cache.
+     */
+    private void generateAndCacheMap(LevelConfig config) {
+        MapGenerator generator = new MapGenerator(config);
+        generator.generate(config.mapWidth, config.mapHeight, GameConstants.CELL_SIZE, config.noiseScale);
+        
+        this.mapImage = generator.getMapImage();
+        this.logicalGrid = generator.getLogicalGrid();
+
+        // Salva a imagem recém-gerada no cache para uso futuro
+        try {
+            File cacheDir = new File("cache");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs(); // Cria a pasta 'cache' se ela não existir
+            }
+            String cacheFileName = "cache/map_seed_" + config.proceduralSeed + ".png";
+            ImageIO.write(this.mapImage, "PNG", new File(cacheFileName));
+            System.out.println("[INFO GameMap] Map saved to cache: " + cacheFileName);
+        } catch (IOException e) {
+            System.err.println("Error saving map to cache file.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Itera através da grade lógica gerada e cria entidades ECS
+     * para quaisquer tiles que não sejam "andáveis", para que possam fazer parte do sistema de colisão.
      */
     private void createEntitiesForSpecialTiles() {
         if (logicalGrid == null) {
              System.err.println("[ERROR GameMap] Logical grid is null. Cannot create special tile entities.");
              return;
         }
-        System.out.println("[INFO GameMap] Creating ECS entities for non-walkable tiles...");
         for (int r = 0; r < heightInTiles; r++) {
             for (int c = 0; c < widthInTiles; c++) {
                 TileType currentType = logicalGrid[r][c];
                 
-                // If the tile itself is not walkable (e.g., a mountain, deep ocean),
-                // create a "phantom" entity with a CollisionComponent at that position.
                 if (currentType != null && !currentType.isWalkable) {
                     Entity obstacleEntity = world.createEntity();
                     world.addComponent(obstacleEntity, new PositionComponent(r, c));
                     world.addComponent(obstacleEntity, new CollisionComponent());
-                    // It doesn't need a Renderable component because it's already drawn on the background.
-                    // Its only purpose is to block movement.
                 }
             }
         }
     }
 
     /**
-     * Gets the logical tile type at the specified grid coordinates.
-     * @param row The row of the tile.
-     * @param column The column of the tile.
-     * @return The TileType at that position, or TileType.UNKNOWN if out of bounds.
+     * Obtém o tipo de tile lógico nas coordenadas da grade especificadas.
+     * @param row A linha do tile.
+     * @param column A coluna do tile.
+     * @return O TileType nessa posição, ou TileType.UNKNOWN se fora dos limites.
      */
     public TileType getLogicalTileType(int row, int column) {
         if (logicalGrid != null && row >= 0 && row < heightInTiles && column >= 0 && column < widthInTiles) {
@@ -89,20 +128,19 @@ public class GameMap {
     }
     
     /**
-     * Returns the pre-rendered image of the entire map.
-     * @return The BufferedImage of the map.
+     * Retorna a imagem pré-renderizada de todo o mapa.
+     * @return O BufferedImage do mapa.
      */
     public BufferedImage getMapImage() {
         return this.mapImage;
     }
 
     /**
-     * --- MÉTODO CORRIGIDO ---
-     * Returns the 2D array representing the logical grid of the map.
-     * @return The TileType[][] logical grid.
+     * Retorna a matriz 2D que representa a grade lógica do mapa.
+     * @return A grade lógica TileType[][].
      */
     public TileType[][] getLogicalGrid() {
-        return this.logicalGrid; // Retorna a grade lógica, em vez de lançar uma exceção.
+        return this.logicalGrid;
     }
     
     public int getWidthInTiles() {

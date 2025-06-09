@@ -2,11 +2,13 @@ package game.evo.utils;
 
 public final class GameConstants {
 
+    
+
     private GameConstants() {
     }
 
     // Map and Tile Dimensions
-    public static final int CELL_SIZE = 64;
+    public static final int CELL_SIZE = 100;
     public static final int DEFAULT_MAP_WIDTH_TILES = 30;
     public static final int DEFAULT_MAP_HEIGHT_TILES = 20;
 
@@ -36,4 +38,6 @@ public final class GameConstants {
     // --- Gameplay Rules ---
     public static final int EVOLUTION_POINTS_FOR_PORTAL = 30; // Pontos necessários para o portal aparecer
     public static final int MAX_LEVELS = 5;
+    
+    public static boolean MAP_BLENDING_ENABLED = false;
 }

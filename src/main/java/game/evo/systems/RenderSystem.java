@@ -33,10 +33,10 @@ public class RenderSystem extends GameSystem {
     }
 
     /**
-     * The main drawing method.
-     * NOTE: To draw notifications, this method now requires the screen width.
-     * You must update the call in your GamePanel's paintComponent method to pass this value.
-     * Example: renderSystem.update(g2d, cameraX, cameraY, this.getWidth());
+     * The main drawing method. NOTE: To draw notifications, this method now
+     * requires the screen width. You must update the call in your GamePanel's
+     * paintComponent method to pass this value. Example:
+     * renderSystem.update(g2d, cameraX, cameraY, this.getWidth());
      */
     public void update(Graphics2D g2d, int cameraX, int cameraY, int screenWidth) {
         if (world == null || g2d == null) {
@@ -52,6 +52,7 @@ public class RenderSystem extends GameSystem {
         }
 
         // 2. Draw notifications on top of everything
+        drawHUD(g2d, screenWidth);
         drawNotifications(g2d, screenWidth);
 
         // 3. If debug mode is on, draw visual overlays on top of notifications
@@ -59,10 +60,63 @@ public class RenderSystem extends GameSystem {
             drawDebugOverlays(g2d, entitiesToRender, cameraX, cameraY);
         }
     }
-    
-    // --- (Todos os seus outros métodos de RenderSystem permanecem aqui sem alterações) ---
+
     // drawEntity, createTransformForEntity, drawDebugOverlays, getImageForEntity, etc.
     // ...
+    // Adicione este novo método dentro da classe RenderSystem.java
+    /**
+     * Desenha a Interface do Usuário (HUD) com informações do jogador.
+     */
+    private void drawHUD(Graphics2D g, int screenWidth) {
+        // 1. Encontrar a entidade do jogador
+        Set<Entity> playerEntities = world.getEntitiesWithComponent(PlayerControlledComponent.class);
+        if (playerEntities.isEmpty()) {
+            return; // Sai se não houver jogador na tela
+        }
+        Entity player = playerEntities.iterator().next();
+
+        // 2. Pegar o componente de status do jogador
+        StatusComponent status = world.getComponent(player, StatusComponent.class);
+        if (status == null) {
+            return; // Sai se o jogador não tiver status
+        }
+
+        // --- Início do Desenho da HUD ---
+        // 3. Barra de Vida
+        int healthBarX = 15;
+        int healthBarY = 15;
+        int healthBarWidth = 200;
+        int healthBarHeight = 25;
+
+        // Fundo da barra
+        g.setColor(new Color(60, 0, 0, 200)); // Vermelho escuro, semi-transparente
+        g.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+
+        // Vida atual (calcula a proporção)
+        double healthPercentage = (double) status.health / status.maxHealth;
+        int currentHealthWidth = (int) (healthBarWidth * healthPercentage);
+
+        g.setColor(new Color(0, 200, 50, 220)); // Verde, semi-transparente
+        g.fillRect(healthBarX, healthBarY, currentHealthWidth, healthBarHeight);
+
+        // Borda da barra
+        g.setColor(Color.WHITE);
+        g.drawRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+
+        // Texto da vida (ex: "80 / 100")
+        g.setFont(new Font("Arial", Font.BOLD, 14));
+        String healthText = status.health + " / " + status.maxHealth;
+        int textWidth = g.getFontMetrics().stringWidth(healthText);
+        g.drawString(healthText, healthBarX + (healthBarWidth - textWidth) / 2, healthBarY + 18);
+
+        // 4. Vidas restantes
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        String livesText = "Vidas: " + status.lives;
+        g.drawString(livesText, 15, 60);
+
+        // Você pode adicionar mais informações aqui (pontos, era atual, etc.)
+    }
 
     /**
      * NEW METHOD: Draws any active notifications on the screen.
@@ -74,7 +128,9 @@ public class RenderSystem extends GameSystem {
         }
 
         NotificationComponent notification = world.getComponent(entities.iterator().next(), NotificationComponent.class);
-        if (notification == null) return;
+        if (notification == null) {
+            return;
+        }
 
         g.setFont(new Font("Arial", Font.BOLD, 20));
         g.setColor(Color.WHITE);
@@ -85,7 +141,7 @@ public class RenderSystem extends GameSystem {
 
         g.drawString(notification.message, x, y);
     }
-    
+
     // --- Resto dos seus métodos Helper ---
     private void drawEntity(Graphics2D g2d, Entity entity, int cameraX, int cameraY) {
         PositionComponent position = world.getComponent(entity, PositionComponent.class);
@@ -173,10 +229,18 @@ public class RenderSystem extends GameSystem {
                     int targetCol = position.column;
                     int targetRow = position.row;
                     switch (dir.facing) {
-                        case UP: targetRow--; break;
-                        case DOWN: targetRow++; break;
-                        case LEFT: targetCol--; break;
-                        case RIGHT: targetCol++; break;
+                        case UP:
+                            targetRow--;
+                            break;
+                        case DOWN:
+                            targetRow++;
+                            break;
+                        case LEFT:
+                            targetCol--;
+                            break;
+                        case RIGHT:
+                            targetCol++;
+                            break;
                     }
                     g2d.setColor(Color.RED);
                     g2d.drawRect(targetCol * GameConstants.CELL_SIZE - cameraX, targetRow * GameConstants.CELL_SIZE - cameraY, GameConstants.CELL_SIZE, GameConstants.CELL_SIZE);

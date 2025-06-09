@@ -5,16 +5,25 @@ import java.awt.Color;
 import java.io.Serializable;
 
 /**
- * Component holding the "genes" or parameters for procedurally generating a sprite.
+ * Component holding the "genes" or parameters for procedurally generating a
+ * sprite.
  */
-public class ProceduralSpriteComponent implements Component , Serializable { // << 2. ADICIONE 'implements Serializable'
+public class ProceduralSpriteComponent implements Component, Serializable { // << 2. ADICIONE 'implements Serializable'
 
-    private static final long serialVersionUID = 1L; 
+    private static final long serialVersionUID = 1L;
+
     public enum BodyType {
-        FINNED_AQUATIC,   // Fish-like creature
-        BIPED_TERRESTRIAL,  // Two-legged creature (like a bird or caveman)
+        FINNED_AQUATIC, // Fish-like creature
+        BIPED_TERRESTRIAL, // Two-legged creature (like a bird or caveman)
         MEAT_CHUNK,
-        PORTAL_SPIRAL
+        PORTAL_SPIRAL,
+        TREE, // <--- ADICIONAR
+        ROCK, // <--- ADICIONAR
+        BUSH,
+        CACTUS, // <-- ADICIONADO
+        FLOWER_PATCH, // <-- ADICIONADO
+        CORAL, // <-- ADICIONADO
+        MUSHROOM_CLUSTER// <-- ADICIONADO
     }
 
     public long creatureSeed; // Seed for this creature's unique shape
@@ -22,7 +31,7 @@ public class ProceduralSpriteComponent implements Component , Serializable { // 
     public Color primaryColor;
     public Color secondaryColor; // For details like eyes or fins
     public BodyType bodyType;
-    
+
     // Animation-related fields
     public long createdAtTime;  // Timestamp of creation for animation timing
     public boolean isMoving;     // Is the entity currently moving?

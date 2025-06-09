@@ -5,6 +5,17 @@
   "mapWidth": 60,
   "mapHeight": 50,
   "noiseScale": 500.0,
+          "terrainRules": [
+    { "biome": "OCEAN_DEEP", "maxElevation": -0.4 },
+    { "biome": "OCEAN_SHALLOW", "maxElevation": -0.3 },
+    { "biome": "BEACH_SAND", "maxElevation": -0.25 },
+    { "biome": "DESERT", "maxElevation": 0.3, "maxMoisture": -0.3 },
+    { "biome": "JUNGLE", "maxElevation": 0.3, "minMoisture": 0.4 },
+    { "biome": "GRASSLAND", "maxElevation": 0.3 },
+    { "biome": "FOREST", "maxElevation": 0.6 },
+    { "biome": "MOUNTAIN_ROCK", "maxElevation": 0.7 },
+    { "biome": "MOUNTAIN_SNOW", "maxElevation": 1.1 }
+  ],
   "player": {
     "row": 25,
     "column": 30,

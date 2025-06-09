@@ -23,4 +23,5 @@ public class LevelConfig {
     // --- MUDANÇA PRINCIPAL ---
     // A lista antiga de 'entities' foi substituída por uma lista de 'biomeRules'.
     public List<BiomeRuleConfig> biomeRules; 
+    public List<TerrainRuleConfig> terrainRules; 
 }

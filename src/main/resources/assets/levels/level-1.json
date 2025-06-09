@@ -1,50 +1,139 @@
 {
-  "levelNumber": 1,
-  "levelName": "The Tidal Pool",
-  "proceduralSeed": 12345,
-  "mapWidth": 60,
-  "mapHeight": 50,
-  "noiseScale": 822.0,
-  "player": {
-    "row": 25,
-    "column": 30,
-    "lives": 3,
-    "properties": {
-      "size": 3,
-      "diet": "OMNIVORE",
-      "bodyType": "FINNED_AQUATIC"
-    }
-  },
-  "biomeRules": [
-    {
-      "biome": "OCEAN_SHALLOW",
-      "spawnables": [
-        {
-          "type": "SkittishNPC",
-          "density": 0.04,
-          "properties": {
-            "size": 2,
-            "speed": 1.8,
+    "levelNumber": 1,
+    "levelName": "The Tidal Pool",
+    "proceduralSeed": 12345,
+    "mapWidth": 60,
+    "mapHeight": 50,
+    "noiseScale": 822.0,
+      "terrainRules": [
+    { "biome": "OCEAN_DEEP", "maxElevation": -0.4 },
+    { "biome": "OCEAN_SHALLOW", "maxElevation": -0.3 },
+    { "biome": "BEACH_SAND", "maxElevation": -0.25 },
+    { "biome": "DESERT", "maxElevation": 0.3, "maxMoisture": -0.3 },
+    { "biome": "JUNGLE", "maxElevation": 0.3, "minMoisture": 0.4 },
+    { "biome": "GRASSLAND", "maxElevation": 0.3 },
+    { "biome": "FOREST", "maxElevation": 0.6 },
+    { "biome": "MOUNTAIN_ROCK", "maxElevation": 0.7 },
+    { "biome": "MOUNTAIN_SNOW", "maxElevation": 1.1 }
+  ],
+    "player": {
+        "row": 25,
+        "column": 30,
+        "lives": 3,
+        "properties": {
+            "size": 3,
+            "diet": "OMNIVORE",
             "bodyType": "FINNED_AQUATIC",
-            "diet": "HERBIVORE"
-          }
+            "seed": 101010
         }
-      ]
     },
-    {
-      "biome": "FOREST",
-      "spawnables": [
+    "biomeRules": [
         {
-          "type": "AggressiveNPC",
-          "density": 0.015,
-          "properties": {
-            "size": 4,
-            "speed": 1.5,
-            "bodyType": "BIPED_TERRESTRIAL",
-            "diet": "CARNIVORE"
-          }
+            "biome": "OCEAN_SHALLOW",
+            "spawnables": [
+                {
+                    "biome": "FOREST",
+                    "spawnables": [
+        
+                        {
+                            "type": "ProceduralScenery",
+                            "density": 0.02,
+                            "properties": {
+                                "size": 3,
+                                "bodyType": "MUSHROOM_CLUSTER",
+                                "isWalkable": true,
+                                "isEdible": true,
+                                "nutrition": 5,
+                                "isPoisonous": true,
+                                "seed": 808080
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "SkittishNPC",
+                    "density": 0.02,
+                    "properties": {
+                        "size": 2,
+                        "speed": 1.8,
+                        "bodyType": "FINNED_AQUATIC",
+                        "diet": "HERBIVORE",
+                        "seed": 202020
+                    }
+                }
+            ]
+        },
+        {
+            "biome": "FOREST",
+            "spawnables": [
+                {
+                    "type": "AggressiveNPC",
+                    "density": 0.01,
+                    "properties": {
+                        "size": 4,
+                        "speed": 1.5,
+                        "bodyType": "BIPED_TERRESTRIAL",
+                        "diet": "CARNIVORE",
+                        "seed": 303030
+                    }
+                },
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.04,
+                    "properties": {
+                        "size": 7,
+                        "bodyType": "TREE",
+                        "isWalkable": false,
+                        "isEdible": false,
+                        "seed": 404040
+                    }
+                }
+            ]
+        },
+        {
+            "biome": "GRASSLAND",
+            "spawnables": [
+                {
+                    "type": "NeutralNPC",
+                    "density": 0.015,
+                    "properties": {
+                        "size": 3,
+                        "speed": 1.2,
+                        "bodyType": "BIPED_TERRESTRIAL",
+                        "diet": "HERBIVORE",
+                        "seed": 505050
+                    }
+                },
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.03,
+                    "properties": {
+                        "size": 4,
+                        "bodyType": "BUSH",
+                        "isWalkable": true,
+                        "isEdible": true,
+                        "nutrition": 15,
+                        "isPoisonous": false,
+                        "seed": 606060
+                    }
+                }
+            ]
+        },
+        {
+            "biome": "BEACH_SAND",
+            "spawnables": [
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.02,
+                    "properties": {
+                        "size": 4,
+                        "bodyType": "ROCK",
+                        "isWalkable": false,
+                        "isEdible": false,
+                        "seed": 707070
+                    }
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

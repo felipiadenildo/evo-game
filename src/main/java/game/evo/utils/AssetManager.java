@@ -36,49 +36,54 @@ public class AssetManager {
         }
     }
 
-    /**
+     /**
      * Gets an image, either from the cache or by loading it from a file.
-     * This method is now "smarter" and will not try to load procedural keys as files.
-     * @param pathOrKey The file path or the custom key for a cached image.
-     * @return The Image object, or null if it's not in the cache and cannot be loaded as a file.
+     * CORRIGIDO: Agora usa o caminho passado diretamente, sem prefixo,
+     * para carregar o recurso corretamente.
      */
     public Image getImage(String pathOrKey) {
         if (pathOrKey == null || pathOrKey.isEmpty()) {
             return null;
         }
 
-        // 1. Check the cache first. This works for both file paths and procedural keys.
+        // 1. Check the cache first.
         if (imageCache.containsKey(pathOrKey)) {
             return imageCache.get(pathOrKey);
         }
 
-        // --- CORREÇÃO PRINCIPAL AQUI ---
-        // 2. If the key starts with "proc_", it's for a procedural sprite that hasn't been
-        //    generated and cached yet. It's NOT a file path. So, we just return null
-        //    and let the RenderSystem handle the generation.
+        // 2. Handle procedural keys.
         if (pathOrKey.startsWith("proc_")) {
             return null;
         }
 
-        // 3. If it's not in the cache and not a procedural key, assume it's a file path
-        //    and try to load it from the resources.
+        // 3. Load from resources using the pathOrKey directly.
         try {
-            String fullPath = GameConstants.ASSETS_PATH + pathOrKey;
-            ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(fullPath));
+            // REMOVIDA A CONCATENAÇÃO com GameConstants.ASSETS_PATH
+            // Usa-se pathOrKey diretamente, pois ele já contém o caminho completo.
+            java.net.URL imageUrl = getClass().getClassLoader().getResource(pathOrKey);
+
+            if (imageUrl == null) {
+                System.err.println("[ERROR AssetManager] Recurso não encontrado: " + pathOrKey);
+                imageCache.put(pathOrKey, null); // Cache the failure
+                return null;
+            }
+
+            ImageIcon icon = new ImageIcon(imageUrl);
             
+            // A verificação de status de carregamento continua sendo uma boa prática
             if (icon.getImageLoadStatus() != java.awt.MediaTracker.COMPLETE || icon.getIconWidth() <= 0) {
-                 System.err.println("[ERROR AssetManager] Failed to load image from resource: " + fullPath);
-                 imageCache.put(pathOrKey, null); // Cache the failure to avoid retrying
+                 System.err.println("[ERROR AssetManager] Falha ao carregar a imagem do recurso: " + pathOrKey);
+                 imageCache.put(pathOrKey, null);
                  return null;
             }
 
             Image image = icon.getImage();
-            imageCache.put(pathOrKey, image); // Add the loaded image to the cache
-            System.out.println("[INFO AssetManager] Loaded and cached image: " + fullPath);
+            imageCache.put(pathOrKey, image); // Add to cache
+            System.out.println("[INFO AssetManager] Imagem carregada e cacheada: " + pathOrKey);
             return image;
 
         } catch (Exception e) {
-            System.err.println("[ERROR AssetManager] Exception while loading file " + pathOrKey + ": " + e.getMessage());
+            System.err.println("[ERROR AssetManager] Exceção ao carregar o arquivo " + pathOrKey + ": " + e.getMessage());
             imageCache.put(pathOrKey, null);
             return null;
         }
