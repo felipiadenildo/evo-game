@@ -1,0 +1,59 @@
+﻿Evo - Roteiro de Desenvolvimento Codificado
+Esta é a lista consolidada e organizada de todas as funcionalidades e requisitos pendentes para o projeto.
+A. Tarefas de Prioridade Imediata (Núcleo da Jogabilidade)
+* A.1. Implementar Comportamentos de IA (Temperamento)
+   * Breve Explicação: Dar vida aos NPCs, fazendo-os reagir ao jogador com base no seu Temperament (Agressivo, Medroso, Neutro) definido no EcologyComponent.
+   * A.1.1. Implementar a lógica de "fugir" (moveAwayFrom) para NPCs SKITTISH.
+   * A.1.2. Implementar a lógica de "perseguir e atacar" (moveTowards) para NPCs AGGRESSIVE.
+   * A.1.3. Manter o comportamento de "vaguear aleatoriamente" (WANDER_RANDOM) para NPCs NEUTRAL.
+* A.2. Implementar Sistema de Stamina
+   * Breve Explicação: Adicionar uma camada tática ao movimento e combate, limitando ações especiais com uma barra de energia.
+   * A.2.1. Adicionar os atributos stamina e maxStamina ao StatusComponent.
+   * A.2.2. Criar um StaminaSystem para gerenciar a regeneração de stamina.
+   * A.2.3. Modificar o PlayerInputSystem para que uma tecla (ex: Shift) ative uma corrida que consome stamina.
+   * A.2.4. Modificar o CombatSystem para que o uso de "golpes especiais" também consuma stamina.
+B. Tarefas de Prioridade Média (Evolução e Ecossistema)
+* B.1. Implementar a Árvore de Habilidades Passivas (Traits/Genes)
+   * Breve Explicação: Criar o sistema de evolução, permitindo que o jogador gaste evolutionPoints para adquirir novas habilidades que afetam seus status ou comportamento.
+   * B.1.1. Definir a estrutura de dados da árvore de evolução com pré-requisitos.
+   * B.1.2. Criar um EvolutionSystem para gerenciar a lógica de evolução e a interface com o jogador.
+   * B.1.3. Implementar o efeito de alguns traits iniciais (ex: "Carapaça" aumenta a defense).
+* B.2. Implementar Interação de Herbívoros com Plantas
+   * Breve Explicação: Permitir que criaturas herbívoras se alimentem de plantas, criando uma nova fonte de comida.
+   * B.2.1. Criar um PlantComponent para marcar entidades como plantas comestíveis.
+   * B.2.2. Adicionar regras para que herbívoros possam "atacar" plantas para gerar um FoodItem vegetal.
+* B.3. Implementar IA de NPC vs. NPC
+   * Breve Explicação: Criar um ecossistema autônomo onde NPCs carnívoros caçam outros NPCs menores.
+   * B.3.1. Expandir o AISystem para que NPCs AGGRESSIVE possam ter como alvo outros NPCs, além do jogador.
+* B.4. Implementar Efeitos de Bioma e Habitat
+   * Breve Explicação: Fazer com que o terreno afete as criaturas, adicionando uma camada estratégica de posicionamento.
+   * B.4.1. Criar um HabitatComponent para definir os biomas preferidos de uma criatura.
+   * B.4.2. Criar um EnvironmentSystem para aplicar efeitos (dano, lentidão) a criaturas fora de seu habitat.
+C. Tarefas de Prioridade Alta (Configuração e Geração Procedural)
+* C.1. Deixar a Definição do Terreno Flexível (via JSON)
+   * Breve Explicação: Permitir que o arquivo .json defina as faixas de valores do ruído que correspondem a cada bioma.
+   * C.1.1. Criar uma nova seção no LevelConfig para as definições de bioma (ex: {"biome": "OCEAN_DEEP", "threshold": -0.5}).
+   * C.1.2. Modificar o MapGenerator para ler e usar essas faixas de valores customizadas.
+* C.2. Criar Objetos da Natureza via Código
+   * Breve Explicação: Gerar árvores, rochas, arbustos, etc., proceduralmente, em vez de usar sprites estáticos.
+   * C.2.1. Expandir o SpriteGenerator e o ProceduralSpriteComponent para suportar BodyTypes como TREE, BUSH, ROCK.
+   * C.2.2. Adicionar propriedades a esses objetos (ex: comestivel, venenoso) e implementar a lógica de interação correspondente.
+* C.3. Melhorar o Design de Criaturas Procedurais
+   * Breve Explicação: Aprimorar o SpriteGenerator para criar sprites mais complexos e realistas para uma visão de cima (top-down), com partes do corpo distintas.
+   * C.3.1. Implementar algoritmos no SpriteGenerator que desenhem pernas, caudas, olhos, etc., com base no BodyType e size.
+D. Tarefas de Polimento e UI
+* D.1. Melhorar a Textura Procedural do Mapa
+   * Breve Explicação: Explorar técnicas mais avançadas de ruído ou o uso de "splat maps" para misturar texturas de sprites de forma suave, criando um visual de terreno menos repetitivo.
+* D.2. Criar uma Barra de Status (HUD)
+   * Breve Explicação: Desenhar uma barra de status fixa na parte inferior da tela com informações básicas do jogador (Vida, Stamina, Pontos de Evolução).
+   * D.2.1. Modificar o GamePanel para reservar um espaço para o HUD.
+   * D.2.2. Modificar o RenderSystem para desenhar os dados do StatusComponent do jogador nesta área.
+E. Tarefas Finais (Requisitos do Projeto PDF)
+* E.1. Completar o Conteúdo das 5 Fases
+   * Breve Explicação: Criar os arquivos .json para os níveis 1 a 5, garantindo que cada um introduza novos desafios, criaturas e regras, cumprindo o requisito principal do projeto.
+* E.2. Implementar Drag-and-Drop de Personagens
+   * Breve Explicação: Permitir que o usuário arraste um arquivo .zip para a janela para adicionar uma criatura customizada.
+   * E.2.1. Criar um utilitário separado para criar e compactar um objeto de entidade serializado.
+   * E.2.2. Implementar a lógica de "drop" no GamePanel para ler o arquivo e usar a EntityFactory.
+* E.3. Preparar a Documentação Final
+   * Breve Explicação: Criar o documento de entrega com o diagrama UML e as instruções de execução.

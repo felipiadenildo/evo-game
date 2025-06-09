@@ -1,0 +1,347 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class AISystem {
+  - playerEntityCache: Entity
+  - gameMap: GameMap
+  - random: Random
+}
+class AiComponent {
+  + initialRow: int
+  + lastMoveTime: long
+  - serialVersionUID: long
+  + patrolRange: int
+  + movingRight: boolean
+  + moveDelay: long
+  + behavior: BehaviorType
+  + initialColumn: int
+  + movingDown: boolean
+}
+class AssetManager {
+  - instance: AssetManager
+  - imageCache: Map<String, Image>
+}
+class BiomeRuleConfig {
+  + biome: String
+  + spawnables: List<SpawnableConfig>
+}
+class CollisionComponent {
+  - serialVersionUID: long
+}
+class CollisionUtil
+class CombatSystem {
+  - entityFactory: EntityFactory
+}
+interface Component << interface >>
+class DirectionComponent {
+  + facing: Direction
+  - serialVersionUID: long
+}
+class EcologyComponent {
+  + diet: DietaryType
+  + temperament: Temperament
+  - serialVersionUID: long
+}
+class Entity {
+  - serialVersionUID: long
+  - nextId: AtomicInteger
+  - id: int
+}
+class EntityConfig {
+  + column: int
+  + image: String
+  + row: int
+  + type: String
+  + properties: Map<String, Object>
+}
+class EntityFactory {
+  - random: Random
+  - world: World
+}
+class FoodComponent {
+  - serialVersionUID: long
+  + nutritionValue: int
+}
+class GameConstants {
+  + LAYER_PLAYER: int
+  + ASSETS_PATH: String
+  + MAX_LEVELS: int
+  + SCREEN_HEIGHT_TILES: int
+  + LAYER_BACKGROUND: int
+  + LAYER_ITEMS: int
+  + EVOLUTION_POINTS_FOR_PORTAL: int
+  + LAYER_EFFECTS: int
+  + DEBUG_MODE_ON: boolean
+  + GAME_LOOP_DELAY_MS: int
+  + DEFAULT_MAP_WIDTH_TILES: int
+  + LAYER_UI: int
+  + LAYER_ENVIRONMENT: int
+  + DEFAULT_MAP_HEIGHT_TILES: int
+  + LAYER_PROJECTILES: int
+  + CELL_SIZE: int
+  + SCREEN_WIDTH_TILES: int
+  + LAYER_NPC: int
+}
+class GameLogicSystem {
+  - entityFactory: EntityFactory
+  - isPortalSpawned: boolean
+}
+class GameMap {
+  - world: World
+  - widthInTiles: int
+  - logicalGrid: TileType[][]
+  - heightInTiles: int
+  - mapImage: BufferedImage
+}
+class GamePanel {
+  - serialVersionUID: long
+  - cameraY: int
+  - gameMap: GameMap
+  - renderSystem: RenderSystem
+  - cameraX: int
+  - world: World
+}
+class GameState {
+  - serialVersionUID: long
+  + world: World
+  + levelNumber: int
+}
+class GameSystem {
+  # world: World
+}
+class GameWindow {
+  - serialVersionUID: long
+  - gamePanel: GamePanel
+}
+class GoToNextLevelComponent {
+  - serialVersionUID: long
+}
+entity GridPosition << record >> {
+  - column: int
+  - serialVersionUID: long
+  - row: int
+}
+class InputManager {
+  - pressedKeys: Set<Integer>
+}
+class InteractionSystem
+class LevelConfig {
+  + player: PlayerConfig
+  + biomeRules: List<BiomeRuleConfig>
+  + mapHeight: int
+  + noiseScale: double
+  + mapWidth: int
+  + levelNumber: int
+  + proceduralSeed: long
+  + levelName: String
+}
+class LevelLoader {
+  - gson: Gson
+}
+class LoadGameRequestComponent {
+  - serialVersionUID: long
+}
+class Main {
+  - currentLevelNumber: int
+  - serialVersionUID: long
+  - gamePanel: GamePanel
+  - saveManager: SaveManager
+  - logicSystems: List<GameSystem>
+  - world: World
+  - gameWindow: GameWindow
+  - gameLoopTimer: Timer
+  - playerEntity: Entity
+}
+class MapGenerator {
+  - logicalGrid: TileType[][]
+  - moistureNoise: OpenSimplexNoise
+  - textureNoise: OpenSimplexNoise
+  - elevationNoise: OpenSimplexNoise
+  - mapImage: BufferedImage
+}
+class NotificationComponent {
+  - serialVersionUID: long
+  + message: String
+  + remainingTimeSeconds: float
+}
+class NotificationSystem
+class NpcComponent {
+  - serialVersionUID: long
+}
+class OpenSimplexNoise {
+  - STRETCH_CONSTANT_4D: double
+  - gradients3D: byte[]
+  - SQUISH_CONSTANT_3D: double
+  - DEFAULT_SEED: long
+  - SQUISH_CONSTANT_4D: double
+  - permGradIndex3D: short[]
+  - STRETCH_CONSTANT_3D: double
+  - SQUISH_CONSTANT_2D: double
+  - NORM_CONSTANT_2D: double
+  - perm: short[]
+  - NORM_CONSTANT_3D: double
+  - NORM_CONSTANT_4D: double
+  - gradients2D: byte[]
+  - STRETCH_CONSTANT_2D: double
+}
+class PlayerConfig {
+  + row: int
+  - serialVersionUID: long
+  + column: int
+  + lives: int
+  + properties: Map<String, Object>
+}
+class PlayerControlledComponent {
+  - serialVersionUID: long
+}
+class PlayerInputSystem {
+  - inputManager: InputManager
+  - spaceKeyWasPressed: boolean
+  - oKeyWasPressed: boolean
+  - pKeyWasPressed: boolean
+  - gameMap: GameMap
+}
+class PopulationSystem {
+  - entityFactory: EntityFactory
+  - levelConfig: LevelConfig
+  - random: Random
+  - gameMap: GameMap
+}
+class PortalComponent {
+  - serialVersionUID: long
+}
+class PositionComponent {
+  - serialVersionUID: long
+  + column: int
+  + row: int
+}
+class ProceduralSpriteComponent {
+  + isMoving: boolean
+  + creatureSeed: long
+  + size: int
+  + bodyType: BodyType
+  + createdAtTime: long
+  + animationFrame: int
+  + secondaryColor: Color
+  + primaryColor: Color
+  - serialVersionUID: long
+}
+class RenderSystem {
+  - spriteGenerator: SpriteGenerator
+}
+class RenderableComponent {
+  + height: int
+  + layer: int
+  + width: int
+  + imagePath: String
+  - serialVersionUID: long
+  + color: Color
+}
+class SaveGameRequestComponent {
+  - serialVersionUID: long
+}
+class SaveManager {
+  - SAVE_DIRECTORY: String
+  - SAVE_FILE_EXTENSION: String
+}
+class SizeComponent {
+  + size: int
+  - serialVersionUID: long
+}
+class SpawnableConfig {
+  + density: double
+  + type: String
+  + properties: Map<String, Object>
+}
+class SpriteGenerator
+class StatusComponent {
+  + attackIV: int
+  + lives: int
+  + hpIV: int
+  + speedIV: int
+  + attack: int
+  - serialVersionUID: long
+  + defense: int
+  + defenseIV: int
+  + maxHealth: int
+  + maxStamina: int
+  + special: int
+  + evolutionPoints: int
+  + stamina: int
+  + health: int
+  + specialIV: int
+  + speed: int
+}
+class TileComponent {
+  + type: TileType
+  - serialVersionUID: long
+  + blocksVision: boolean
+  + isWalkable: boolean
+}
+enum TileType << enumeration >> {
+  + BEACH_SAND: 
+  + MOUNTAIN_SNOW: 
+  + TUNDRA: 
+  + OCEAN_SHALLOW: 
+  + FOREST: 
+  + OCEAN_DEEP: 
+  + isWalkable: boolean
+  + UNKNOWN: 
+  + MOUNTAIN_ROCK: 
+  + DESERT: 
+  + GRASSLAND: 
+  + JUNGLE: 
+}
+class Trait {
+  + description: String
+  + id: String
+  + name: String
+  + prerequisites: List<String>
+}
+class TraitComponent {
+  - serialVersionUID: long
+  + acquiredTraits: Set<String>
+}
+class WantsToAttackComponent {
+  - serialVersionUID: long
+}
+class World {
+  - componentsByType: Map<Class<Component>, Map<Entity, Component>>
+  - entityComponentTypes: Map<Entity, Set<Class<Component>>>
+  + MODO_VERBOSE_WORLD: boolean
+  - entities: Set<Entity>
+  - serialVersionUID: long
+}
+
+AISystem                   -[#000082,plain]-^  GameSystem                
+AiComponent                -[#008200,dashed]-^  Component                 
+CollisionComponent         -[#008200,dashed]-^  Component                 
+CombatSystem               -[#000082,plain]-^  GameSystem                
+DirectionComponent         -[#008200,dashed]-^  Component                 
+EcologyComponent           -[#008200,dashed]-^  Component                 
+FoodComponent              -[#008200,dashed]-^  Component                 
+GameLogicSystem            -[#000082,plain]-^  GameSystem                
+GoToNextLevelComponent     -[#008200,dashed]-^  Component                 
+InteractionSystem          -[#000082,plain]-^  GameSystem                
+LoadGameRequestComponent   -[#008200,dashed]-^  Component                 
+NotificationComponent      -[#008200,dashed]-^  Component                 
+NotificationSystem         -[#000082,plain]-^  GameSystem                
+NpcComponent               -[#008200,dashed]-^  Component                 
+PlayerControlledComponent  -[#008200,dashed]-^  Component                 
+PlayerInputSystem          -[#000082,plain]-^  GameSystem                
+PopulationSystem           -[#000082,plain]-^  GameSystem                
+PortalComponent            -[#008200,dashed]-^  Component                 
+PositionComponent          -[#008200,dashed]-^  Component                 
+ProceduralSpriteComponent  -[#008200,dashed]-^  Component                 
+RenderSystem               -[#000082,plain]-^  GameSystem                
+RenderableComponent        -[#008200,dashed]-^  Component                 
+SaveGameRequestComponent   -[#008200,dashed]-^  Component                 
+SizeComponent              -[#008200,dashed]-^  Component                 
+StatusComponent            -[#008200,dashed]-^  Component                 
+TileComponent              -[#008200,dashed]-^  Component                 
+TraitComponent             -[#008200,dashed]-^  Component                 
+WantsToAttackComponent     -[#008200,dashed]-^  Component                 
+@enduml
