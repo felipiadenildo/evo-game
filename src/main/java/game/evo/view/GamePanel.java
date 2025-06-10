@@ -1,5 +1,7 @@
 package game.evo.view;
 
+import game.evo.components.NotificationComponent;
+import game.evo.components.PlayerControlledComponent;
 import game.evo.config.EntityConfig;
 import game.evo.ecs.World;
 import game.evo.input.InputManager;
@@ -27,10 +29,11 @@ import java.util.List;
 import java.util.zip.ZipInputStream;
 
 /**
- * GamePanel is the custom JPanel where the game is rendered.
- * REFATORADO: Agora lida com carregamento de mapa assíncrono e inclui Drag-and-Drop.
+ * GamePanel is the custom JPanel where the game is rendered. REFATORADO: Agora
+ * lida com carregamento de mapa assíncrono e inclui Drag-and-Drop.
  */
 public class GamePanel extends JPanel {
+
     private static final long serialVersionUID = 1L;
 
     private final World world;
@@ -63,10 +66,18 @@ public class GamePanel extends JPanel {
 
         // Lógica de Drag-and-Drop
         new DropTarget(this, new DropTargetListener() {
-            public void dragEnter(DropTargetDragEvent dtde) {}
-            public void dragOver(DropTargetDragEvent dtde) {}
-            public void dropActionChanged(DropTargetDragEvent dtde) {}
-            public void dragExit(DropTargetEvent dte) {}
+            public void dragEnter(DropTargetDragEvent dtde) {
+            }
+
+            public void dragOver(DropTargetDragEvent dtde) {
+            }
+
+            public void dropActionChanged(DropTargetDragEvent dtde) {
+            }
+
+            public void dragExit(DropTargetEvent dte) {
+            }
+
             @Override
             public void drop(DropTargetDropEvent event) {
                 try {
@@ -88,6 +99,7 @@ public class GamePanel extends JPanel {
 
     /**
      * NOVO MÉTODO: Processa o arquivo que foi arrastado e solto na janela.
+     *
      * @param file O arquivo recebido.
      * @param dropPoint O ponto (em pixels da tela) onde o arquivo foi solto.
      */
@@ -101,7 +113,7 @@ public class GamePanel extends JPanel {
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(file))) {
             // Procura pelo nosso arquivo de dados "creature.dat" dentro do zip
             if (zis.getNextEntry().getName().equals("creature.dat")) {
-                
+
                 // Lê os bytes do arquivo de dados para a memória
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 byte[] buffer = new byte[1024];
@@ -109,7 +121,7 @@ public class GamePanel extends JPanel {
                 while ((len = zis.read(buffer)) > 0) {
                     baos.write(buffer, 0, len);
                 }
-                
+
                 // Desserializa os bytes de volta para um objeto EntityConfig
                 ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
                 ObjectInputStream ois = new ObjectInputStream(bais);
@@ -125,6 +137,11 @@ public class GamePanel extends JPanel {
                 customConfig.column = gridCol;
                 entityFactory.createGameEntity(customConfig);
 
+                entityFactory.createGameEntity(customConfig);
+                world.getEntitiesWithComponent(PlayerControlledComponent.class).stream().findFirst().ifPresent(player -> {
+                    world.addComponent(player, new NotificationComponent("Custom creature added!", NotificationComponent.NotificationType.SUCCESS, 3.0f));
+                });
+
                 System.out.println("[DragNDrop] Criatura customizada '" + customConfig.type + "' adicionada ao mundo na posição (" + gridRow + ", " + gridCol + ")");
             }
         } catch (Exception e) {
@@ -132,7 +149,6 @@ public class GamePanel extends JPanel {
             e.printStackTrace();
         }
     }
-
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -145,12 +161,12 @@ public class GamePanel extends JPanel {
                 g2d.fillRect(0, 0, getWidth(), getHeight());
                 return; // Encerra o desenho aqui para esta frame
             }
-            
+
             BufferedImage mapImage = gameMap.getMapImage();
             if (mapImage != null) {
                 g2d.drawImage(mapImage, 0, 0, getWidth(), getHeight(), cameraX, cameraY, cameraX + getWidth(), cameraY + getHeight(), null);
             }
-            this.renderSystem.update(g2d, cameraX, cameraY, this.getWidth());
+            this.renderSystem.update(g2d, cameraX, cameraY, this.getWidth(), this.getHeight());
 
         } catch (Exception e) {
             System.err.println("[CRITICAL ERROR in GamePanel.paintComponent] Exception during rendering:");
@@ -162,7 +178,9 @@ public class GamePanel extends JPanel {
 
     public void setCameraPosition(int newCamX, int newCamY) {
         // Adiciona uma verificação para evitar NullPointerException antes do mapa ser carregado
-        if (gameMap == null) return;
+        if (gameMap == null) {
+            return;
+        }
 
         int worldPixelWidth = gameMap.getWidthInTiles() * GameConstants.CELL_SIZE;
         int worldPixelHeight = gameMap.getHeightInTiles() * GameConstants.CELL_SIZE;
@@ -182,7 +200,7 @@ public class GamePanel extends JPanel {
     public GameMap getGameMap() {
         return this.gameMap;
     }
-    
+
     public InputManager getInputManager() {
         return this.inputManager;
     }

@@ -1,61 +1,73 @@
 {
-  "levelNumber": 1,
-  "levelName": "The Tidal Pool",
-  "proceduralSeed": 12345,
-  "mapWidth": 60,
-  "mapHeight": 50,
-  "noiseScale": 500.0,
-          "terrainRules": [
-    { "biome": "OCEAN_DEEP", "maxElevation": -0.4 },
-    { "biome": "OCEAN_SHALLOW", "maxElevation": -0.3 },
-    { "biome": "BEACH_SAND", "maxElevation": -0.25 },
-    { "biome": "DESERT", "maxElevation": 0.3, "maxMoisture": -0.3 },
-    { "biome": "JUNGLE", "maxElevation": 0.3, "minMoisture": 0.4 },
-    { "biome": "GRASSLAND", "maxElevation": 0.3 },
-    { "biome": "FOREST", "maxElevation": 0.6 },
-    { "biome": "MOUNTAIN_ROCK", "maxElevation": 0.7 },
-    { "biome": "MOUNTAIN_SNOW", "maxElevation": 1.1 }
-  ],
-  "player": {
-    "row": 25,
-    "column": 30,
-    "lives": 3,
-    "properties": {
-      "size": 3,
-      "diet": "OMNIVORE",
-      "bodyType": "FINNED_AQUATIC"
-    }
-  },
-  "biomeRules": [
-    {
-      "biome": "OCEAN_SHALLOW",
-      "spawnables": [
-        {
-          "type": "SkittishNPC",
-          "density": 0.5,
-          "properties": {
-            "size": 2,
-            "speed": 1.8,
-            "bodyType": "FINNED_AQUATIC",
-            "diet": "HERBIVORE"
-          }
+    "levelNumber": 2,
+    "levelName": "The Sandy Shores",
+    "description": "A terra chama. As criaturas mais ousadas deixam a segurança da água para explorar as vastas e perigosas praias. \n A adaptação é a chave para a sobrevivência nesta nova fronteira.",
+    "proceduralSeed": 67890,
+    "mapWidth": 40,
+    "mapHeight": 35,
+    "noiseScale": 650.0,
+    "terrainRules": [
+        { "biome": "OCEAN_DEEP", "maxElevation": -0.6 },
+        { "biome": "OCEAN_SHALLOW", "maxElevation": -0.4 },
+        { "biome": "BEACH_SAND", "maxElevation": 0.2 },
+        { "biome": "GRASSLAND", "maxElevation": 1.0 }
+    ],
+    "player": {
+        "row": 20,
+        "column": 18,
+        "lives": 3,
+        "properties": {
+            "size": 3,
+            "diet": "OMNIVORE",
+            "bodyType": "AMPHIBIOUS",
+            "seed": 202020
         }
-      ]
     },
-    {
-      "biome": "FOREST",
-      "spawnables": [
+    "biomeRules": [
         {
-          "type": "AggressiveNPC",
-          "density": 0.015,
-          "properties": {
-            "size": 4,
-            "speed": 1.5,
-            "bodyType": "BIPED_TERRESTRIAL",
-            "diet": "CARNIVORE"
-          }
+            "biome": "BEACH_SAND",
+            "spawnables": [
+                {
+                    "type": "NeutralNPC",
+                    "density": 0.02,
+                    "properties": { "size": 3, "speed": 1.2, "bodyType": "CRAB_LIKE", "diet": "CARNIVORE", "seed": 334455 }
+                },
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.02,
+                    "properties": { "size": 4, "bodyType": "ROCK", "isWalkable": false, "isEdible": false, "seed": 667788 }
+                }
+            ]
+        },
+        {
+            "biome": "OCEAN_SHALLOW",
+            "spawnables": [
+                {
+                    "type": "SkittishNPC",
+                    "density": 0.03,
+                    "properties": { "size": 2, "speed": 2.2, "bodyType": "FINNED_AQUATIC", "diet": "HERBIVORE", "seed": 990011 }
+                },
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.01,
+                    "properties": { "size": 3, "bodyType": "SEAWEED_CLUSTER", "isWalkable": true, "isEdible": true, "nutrition": 5, "isPoisonous": false, "seed": 112233 }
+                }
+            ]
+        },
+        {
+            "biome": "GRASSLAND",
+            "spawnables": [
+                {
+                    "type": "AggressiveNPC",
+                    "density": 0.015,
+                    "properties": { "size": 4, "speed": 1.6, "bodyType": "BIPED_TERRESTRIAL", "diet": "OMNIVORE", "seed": 445566 }
+                },
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.03,
+                    "properties": { "size": 4, "bodyType": "BUSH", "isWalkable": true, "isEdible": true, "nutrition": 10, "isPoisonous": false, "seed": 778899 }
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

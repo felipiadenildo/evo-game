@@ -11,6 +11,7 @@ public class LevelConfig {
     public int levelNumber;
     public String levelName;
     public long proceduralSeed;
+    public String description;
     
     // Configurações do mapa, lidas do arquivo JSON
     public int mapWidth;

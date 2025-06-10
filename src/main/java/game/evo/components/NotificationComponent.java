@@ -1,19 +1,32 @@
 package game.evo.components;
 
-import game.evo.ecs.Component; // Importa a interface base do seu sistema ECS
+import game.evo.ecs.Component;
+import java.io.Serializable;
 
 /**
- * A component that holds a message to be displayed on the screen for a limited time.
- * It implements the base Component interface to be compatible with the World.
+ * Componente que exibe uma mensagem temporária na tela.
+ * REFATORADO: Agora suporta tipos de notificação, ícones e animação.
  */
-public class NotificationComponent implements Component {
+public class NotificationComponent implements Component, Serializable {
     private static final long serialVersionUID = 1L;
 
-    public String message;
-    public float remainingTimeSeconds; // How long the message should stay on screen
+    // Enum para os diferentes tipos de notificação
+    public enum NotificationType {
+        INFO,      // Para informações gerais (entrou no portal)
+        SUCCESS,   // Para ações bem-sucedidas (comeu, salvou)
+        WARNING,   // Para alertas ou dano recebido
+        COMBAT     // Para ações de combate (dano causado)
+    }
 
-    public NotificationComponent(String message, float durationSeconds) {
+    public String message;
+    public NotificationType type;
+    public float initialDuration; // Duração total para cálculo da animação
+    public float remainingDuration; // Duração atual que será decrementada
+
+    public NotificationComponent(String message, NotificationType type, float durationInSeconds) {
         this.message = message;
-        this.remainingTimeSeconds = durationSeconds;
+        this.type = type;
+        this.initialDuration = durationInSeconds;
+        this.remainingDuration = durationInSeconds;
     }
 }

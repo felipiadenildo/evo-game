@@ -1,5 +1,6 @@
 package game.evo.systems;
 
+import game.evo.components.ActivatingPortalComponent;
 import game.evo.ecs.Entity;
 import game.evo.ecs.World;
 import game.evo.components.FoodComponent;
@@ -8,15 +9,16 @@ import game.evo.components.PositionComponent;
 import game.evo.components.StatusComponent;
 import game.evo.components.PortalComponent;
 import game.evo.components.GoToNextLevelComponent;
-import game.evo.components.NotificationComponent;
+import game.evo.components.NotificationComponent; // Importa o componente de notificação
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 /**
- * Handles interactions between the player and other entities, such as
- * collecting items (food) and entering portals.
+ * Lida com interações entre o jogador e outras entidades, como
+ * coletar itens (comida) e entrar em portais.
+ * REFATORADO: Agora cria notificações visuais para as interações.
  */
 public class InteractionSystem extends GameSystem {
 
@@ -25,103 +27,106 @@ public class InteractionSystem extends GameSystem {
     }
 
     /**
-     * The update method, called every frame by the main game loop.
-     * It checks for interactions between the player and other entities.
+     * O método de atualização, chamado a cada frame pelo game loop principal.
      */
     @Override
     public void update() {
-        // Find the player entity
+        // Encontra a entidade do jogador
         Set<Entity> playerEntities = world.getEntitiesWithComponent(PlayerControlledComponent.class);
         if (playerEntities.isEmpty()) {
-            return; // No player in the world, nothing to do
+            return; // Sem jogador, sem interações
         }
         Entity player = playerEntities.iterator().next();
 
         PositionComponent playerPos = world.getComponent(player, PositionComponent.class);
         if (playerPos == null) {
-            return; // Player must have a position to interact
+            return; // Jogador precisa de uma posição para interagir
         }
 
-        // Find all entities that are at the same position as the player
+        // Encontra todas as entidades na mesma posição que o jogador
         List<Entity> entitiesAtPlayerPosition = findEntitiesAt(playerPos.row, playerPos.column);
 
-        // Iterate through the co-located entities to check for interactions
+        // Itera sobre as entidades para verificar interações
         for (Entity otherEntity : entitiesAtPlayerPosition) {
             if (otherEntity.equals(player)) {
-                continue; // An entity cannot interact with itself
+                continue; // Uma entidade não pode interagir consigo mesma
             }
 
-            // Check if the entity is a food item
+            // Verifica se a entidade é um item de comida
             if (world.hasComponent(otherEntity, FoodComponent.class)) {
                 eatFood(player, otherEntity);
-                break; // Interact with only one item per frame to avoid consuming multiple stacked items
+                break; // Interage com apenas um item por frame
             }
 
-            // Check if the entity is a portal
+            // Verifica se a entidade é um portal
             if (world.hasComponent(otherEntity, PortalComponent.class)) {
                 enterPortal(player);
-                break; // Interact with only one item per frame
+                break; // Interage com apenas um item por frame
             }
         }
     }
 
     /**
- * Lida com a lógica para um jogador consumir um item alimentar.
- * MODIFICADO: Agora diferencia entre comida normal e venenosa.
- * @param player O jogador.
- * @param foodItem O item alimentar a ser consumido.
- */
-private void eatFood(Entity player, Entity foodItem) {
-    StatusComponent playerStatus = world.getComponent(player, StatusComponent.class);
-    FoodComponent foodData = world.getComponent(foodItem, FoodComponent.class);
+     * Lida com a lógica para um jogador consumir um item alimentar.
+     * MODIFICADO: Diferencia comida normal e venenosa e cria notificações visuais.
+     * @param player O jogador.
+     * @param foodItem O item alimentar a ser consumido.
+     */
+    private void eatFood(Entity player, Entity foodItem) {
+        StatusComponent playerStatus = world.getComponent(player, StatusComponent.class);
+        FoodComponent foodData = world.getComponent(foodItem, FoodComponent.class);
 
-    if (playerStatus == null || foodData == null) {
-        System.err.println("[WARN InteractionSystem] Player or Food is missing required components for interaction.");
-        return;
+        if (playerStatus == null || foodData == null) {
+            System.err.println("[WARN InteractionSystem] Player or Food is missing required components for interaction.");
+            return;
+        }
+
+        // Verifica se o alimento é venenoso
+        if (foodData.isPoisonous) {
+            int damage = foodData.nutritionValue;
+            playerStatus.health -= damage;
+            
+            // Adiciona uma notificação de AVISO na tela
+            world.addComponent(player, new NotificationComponent("Poison! -" + damage + " health", NotificationComponent.NotificationType.WARNING, 3.0f));
+
+        } else {
+            // Comida normal: adiciona pontos de evolução e regenera vida
+            playerStatus.evolutionPoints += foodData.nutritionValue + 20;
+            playerStatus.health = Math.min(playerStatus.maxHealth, playerStatus.health + foodData.nutritionValue);
+
+            // Adiciona uma notificação de SUCESSO na tela
+            world.addComponent(player, new NotificationComponent("+" + foodData.nutritionValue + " points!", NotificationComponent.NotificationType.SUCCESS, 2.0f));
+        }
+
+        // Remove o item do mundo após a interação
+        world.destroyEntity(foodItem);
     }
-
-    // Verifica se o alimento é venenoso 
-    if (foodData.isPoisonous) {
-        // Causa dano em vez de curar
-        int damage = foodData.nutritionValue; // "nutrition" aqui representa a potência do veneno
-        playerStatus.health -= damage;
-        System.out.println("[INFO GAME] Player ate something poisonous! Lost " + damage + " health.");
-        
-        // Adiciona uma notificação na tela para o jogador
-        world.addComponent(player, new NotificationComponent("You ate something poisonous!", 3.0f));
-
-    } else {
-        // Comida normal: adiciona pontos de evolução e regenera vida
-        playerStatus.evolutionPoints += foodData.nutritionValue;
-        playerStatus.health = Math.min(playerStatus.maxHealth, playerStatus.health + foodData.nutritionValue);
-
-        System.out.println("[INFO GAME] Player ate food! Gained " + foodData.nutritionValue + " evolution points. Total: " + playerStatus.evolutionPoints);
-        
-        // Adiciona uma notificação positiva
-        world.addComponent(player, new NotificationComponent("Yummy! +" + foodData.nutritionValue + " points.", 2.0f));
-    }
-
-    // Remove o item do mundo após a interação, seja ele venenoso ou não
-    world.destroyEntity(foodItem);
-}
 
     /**
-     * Handles the logic for a player entering a portal.
-     * It adds a "GoToNextLevelComponent" to the player, which acts as an event
-     * for the main game loop to detect and trigger the level transition.
-     * @param player The player entity.
+     * Lida com a lógica para um jogador entrar em um portal.
+     * MODIFICADO: Agora cria uma notificação visual.
+     * @param player A entidade do jogador.
      */
     private void enterPortal(Entity player) {
-        System.out.println("[INFO GAME] Player entered the portal! Triggering next level load...");
-        // Add the event component to signal the main loop
-        world.addComponent(player, new GoToNextLevelComponent());
+        // Se o jogador já estiver ativando um portal, não faz nada
+        if (world.hasComponent(player, ActivatingPortalComponent.class)) {
+            return;
+        }
+
+        System.out.println("[InteractionSystem] Player entered the portal! Starting activation sequence...");
+        
+        // Adiciona o componente de ativação com um delay de 2 segundos
+        world.addComponent(player, new ActivatingPortalComponent(2.0f));
+        
+        // Adiciona uma notificação para o jogador saber o que está acontecendo
+        world.addComponent(player, new NotificationComponent("Portal activating...", NotificationComponent.NotificationType.INFO, 2.0f));
     }
 
     /**
-     * Helper method to find all entities at a specific grid location.
-     * @param row The target row.
-     * @param col The target column.
-     * @return A list of all entities at that position.
+     * Método auxiliar para encontrar todas as entidades em uma localização específica da grade.
+     * @param row A linha alvo.
+     * @param col A coluna alvo.
+     * @return Uma lista de todas as entidades naquela posição.
      */
     private List<Entity> findEntitiesAt(int row, int col) {
         List<Entity> foundEntities = new ArrayList<>();

@@ -105,8 +105,8 @@ O projeto é construído sobre uma arquitetura **Entity-Component-System (ECS)**
 
 
 
-* **Status:** **Pendente**
-* **Plano de Implementação:** Esta é uma das próximas tarefas principais. A abordagem será a seguinte:
+* **Status:** **Concluído**
+* **Plano de Implementação:** 
     1. **Criar um Utilitário de Geração de ZIP:** Será desenvolvido um pequeno programa Java separado (ou um script) com a única função de:
         * Criar um objeto EntityConfig com as propriedades de uma criatura customizada.
         * Serializar este objeto EntityConfig usando ObjectOutputStream.

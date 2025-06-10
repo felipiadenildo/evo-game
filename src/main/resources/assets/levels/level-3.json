@@ -1,61 +1,74 @@
 {
-  "levelNumber": 1,
-  "levelName": "The Tidal Pool",
-  "proceduralSeed": 12345,
-  "mapWidth": 60,
-  "mapHeight": 50,
-  "noiseScale": 500.0,
-          "terrainRules": [
-    { "biome": "OCEAN_DEEP", "maxElevation": -0.4 },
-    { "biome": "OCEAN_SHALLOW", "maxElevation": -0.3 },
-    { "biome": "BEACH_SAND", "maxElevation": -0.25 },
-    { "biome": "DESERT", "maxElevation": 0.3, "maxMoisture": -0.3 },
-    { "biome": "JUNGLE", "maxElevation": 0.3, "minMoisture": 0.4 },
-    { "biome": "GRASSLAND", "maxElevation": 0.3 },
-    { "biome": "FOREST", "maxElevation": 0.6 },
-    { "biome": "MOUNTAIN_ROCK", "maxElevation": 0.7 },
-    { "biome": "MOUNTAIN_SNOW", "maxElevation": 1.1 }
-  ],
-  "player": {
-    "row": 25,
-    "column": 30,
-    "lives": 3,
-    "properties": {
-      "size": 3,
-      "diet": "OMNIVORE",
-      "bodyType": "FINNED_AQUATIC"
-    }
-  },
-  "biomeRules": [
-    {
-      "biome": "OCEAN_SHALLOW",
-      "spawnables": [
-        {
-          "type": "SkittishNPC",
-          "density": 0.5,
-          "properties": {
-            "size": 2,
-            "speed": 1.8,
-            "bodyType": "FINNED_AQUATIC",
-            "diet": "HERBIVORE"
-          }
-        }
-      ]
-    },
-    {
-      "biome": "FOREST",
-      "spawnables": [
-        {
-          "type": "AggressiveNPC",
-          "density": 0.015,
-          "properties": {
+    "levelNumber": 3,
+    "levelName": "The Verdant Jungle",
+    "description": "A terra agora pulsa com vida. Selvas densas e florestas exuberantes cobrem a paisagem, \n oferecendo tanto vastos recursos quanto predadores mortais à espreita nas sombras.",
+    "proceduralSeed": 54321,
+    "mapWidth": 40,
+    "mapHeight": 40,
+    "noiseScale": 700.0,
+    "terrainRules": [
+        { "biome": "OCEAN_SHALLOW", "maxElevation": -0.8 },
+        { "biome": "BEACH_SAND", "maxElevation": -0.7 },
+        { "biome": "GRASSLAND", "maxElevation": 0.1 },
+        { "biome": "JUNGLE", "maxElevation": 0.5, "minMoisture": 0.3 },
+        { "biome": "FOREST", "maxElevation": 1.0 }
+    ],
+    "player": {
+        "row": 20,
+        "column": 20,
+        "lives": 3,
+        "properties": {
             "size": 4,
-            "speed": 1.5,
+            "diet": "OMNIVORE",
             "bodyType": "BIPED_TERRESTRIAL",
-            "diet": "CARNIVORE"
-          }
+            "seed": 303030
         }
-      ]
-    }
-  ]
+    },
+    "biomeRules": [
+        {
+            "biome": "JUNGLE",
+            "spawnables": [
+                {
+                    "type": "AggressiveNPC",
+                    "density": 0.015,
+                    "properties": { "size": 5, "speed": 1.4, "bodyType": "BIPED_TERRESTRIAL", "diet": "CARNIVORE", "seed": 556677 }
+                },
+                 {
+                    "type": "ProceduralScenery",
+                    "density": 0.02,
+                    "properties": { "size": 8, "bodyType": "TREE", "isWalkable": false, "isEdible": false, "seed": 889900 }
+                }
+            ]
+        },
+        {
+            "biome": "FOREST",
+            "spawnables": [
+                {
+                    "type": "NeutralNPC",
+                    "density": 0.02,
+                    "properties": { "size": 4, "speed": 1.3, "bodyType": "BIPED_TERRESTRIAL", "diet": "HERBIVORE", "seed": 112244 }
+                },
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.02,
+                    "properties": { "size": 3, "bodyType": "MUSHROOM_CLUSTER", "isWalkable": true, "isEdible": true, "nutrition": 5, "isPoisonous": true, "seed": 335577 }
+                }
+            ]
+        },
+        {
+            "biome": "GRASSLAND",
+            "spawnables": [
+                {
+                    "type": "SkittishNPC",
+                    "density": 0.025,
+                    "properties": { "size": 3, "speed": 2.5, "bodyType": "QUADRUPED", "diet": "HERBIVORE", "seed": 668800 }
+                },
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.03,
+                    "properties": { "size": 4, "bodyType": "BUSH", "isWalkable": true, "isEdible": true, "nutrition": 15, "isPoisonous": false, "seed": 991133 }
+                }
+            ]
+        }
+    ]
 }

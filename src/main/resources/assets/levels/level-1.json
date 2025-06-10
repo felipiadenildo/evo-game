@@ -1,27 +1,23 @@
 {
     "levelNumber": 1,
-    "levelName": "The Tidal Pool",
+    "levelName": "The Primordial Pool",
+    "description": "A vida está apenas começando. Nesta sopa primordial, você deve consumir para crescer. \n Acumule Pontos de Evolução para ativar o vórtex para a próxima era da existência. Use as setas ou WASD para se mover e spacebar para atacar.",
     "proceduralSeed": 12345,
-    "mapWidth": 60,
-    "mapHeight": 50,
-    "noiseScale": 822.0,
-      "terrainRules": [
-    { "biome": "OCEAN_DEEP", "maxElevation": -0.4 },
-    { "biome": "OCEAN_SHALLOW", "maxElevation": -0.3 },
-    { "biome": "BEACH_SAND", "maxElevation": -0.25 },
-    { "biome": "DESERT", "maxElevation": 0.3, "maxMoisture": -0.3 },
-    { "biome": "JUNGLE", "maxElevation": 0.3, "minMoisture": 0.4 },
-    { "biome": "GRASSLAND", "maxElevation": 0.3 },
-    { "biome": "FOREST", "maxElevation": 0.6 },
-    { "biome": "MOUNTAIN_ROCK", "maxElevation": 0.7 },
-    { "biome": "MOUNTAIN_SNOW", "maxElevation": 1.1 }
-  ],
+    "mapWidth": 35,
+    "mapHeight": 30,
+    "noiseScale": 500.0,
+    "terrainRules": [
+        { "biome": "OCEAN_DEEP", "maxElevation": -0.3 },
+        { "biome": "OCEAN_SHALLOW", "maxElevation": 0.1 },
+        { "biome": "BEACH_SAND", "maxElevation": 0.15 },
+        { "biome": "GRASSLAND", "maxElevation": 1.0 }
+    ],
     "player": {
-        "row": 25,
-        "column": 30,
+        "row": 15,
+        "column": 15,
         "lives": 3,
         "properties": {
-            "size": 3,
+            "size": 2,
             "diet": "OMNIVORE",
             "bodyType": "FINNED_AQUATIC",
             "seed": 101010
@@ -32,90 +28,29 @@
             "biome": "OCEAN_SHALLOW",
             "spawnables": [
                 {
-                    "biome": "FOREST",
-                    "spawnables": [
-        
-                        {
-                            "type": "ProceduralScenery",
-                            "density": 0.02,
-                            "properties": {
-                                "size": 3,
-                                "bodyType": "MUSHROOM_CLUSTER",
-                                "isWalkable": true,
-                                "isEdible": true,
-                                "nutrition": 5,
-                                "isPoisonous": true,
-                                "seed": 808080
-                            }
-                        }
-                    ]
+                    "type": "SkittishNPC",
+                    "density": 0.03,
+                    "properties": { "size": 1, "speed": 2.0, "bodyType": "FINNED_AQUATIC", "diet": "HERBIVORE", "seed": 112233 }
                 },
                 {
-                    "type": "SkittishNPC",
+                    "type": "ProceduralScenery",
                     "density": 0.02,
-                    "properties": {
-                        "size": 2,
-                        "speed": 1.8,
-                        "bodyType": "FINNED_AQUATIC",
-                        "diet": "HERBIVORE",
-                        "seed": 202020
-                    }
+                    "properties": { "size": 3, "bodyType": "SEAWEED_CLUSTER", "isWalkable": true, "isEdible": true, "nutrition": 5, "isPoisonous": false, "seed": 445566 }
                 }
             ]
         },
         {
-            "biome": "FOREST",
+            "biome": "OCEAN_DEEP",
             "spawnables": [
                 {
                     "type": "AggressiveNPC",
                     "density": 0.01,
-                    "properties": {
-                        "size": 4,
-                        "speed": 1.5,
-                        "bodyType": "BIPED_TERRESTRIAL",
-                        "diet": "CARNIVORE",
-                        "seed": 303030
-                    }
+                    "properties": { "size": 3, "speed": 1.5, "bodyType": "FINNED_AQUATIC", "diet": "CARNIVORE", "seed": 778899 }
                 },
                 {
                     "type": "ProceduralScenery",
-                    "density": 0.04,
-                    "properties": {
-                        "size": 7,
-                        "bodyType": "TREE",
-                        "isWalkable": false,
-                        "isEdible": false,
-                        "seed": 404040
-                    }
-                }
-            ]
-        },
-        {
-            "biome": "GRASSLAND",
-            "spawnables": [
-                {
-                    "type": "NeutralNPC",
                     "density": 0.015,
-                    "properties": {
-                        "size": 3,
-                        "speed": 1.2,
-                        "bodyType": "BIPED_TERRESTRIAL",
-                        "diet": "HERBIVORE",
-                        "seed": 505050
-                    }
-                },
-                {
-                    "type": "ProceduralScenery",
-                    "density": 0.03,
-                    "properties": {
-                        "size": 4,
-                        "bodyType": "BUSH",
-                        "isWalkable": true,
-                        "isEdible": true,
-                        "nutrition": 15,
-                        "isPoisonous": false,
-                        "seed": 606060
-                    }
+                    "properties": { "size": 5, "bodyType": "CORAL_REEF", "isWalkable": false, "isEdible": false, "seed": 990011 }
                 }
             ]
         },
@@ -123,15 +58,14 @@
             "biome": "BEACH_SAND",
             "spawnables": [
                 {
+                    "type": "NeutralNPC",
+                    "density": 0.02,
+                    "properties": { "size": 2, "speed": 1.0, "bodyType": "AMPHIBIOUS", "diet": "OMNIVORE", "seed": 224466 }
+                },
+                {
                     "type": "ProceduralScenery",
                     "density": 0.02,
-                    "properties": {
-                        "size": 4,
-                        "bodyType": "ROCK",
-                        "isWalkable": false,
-                        "isEdible": false,
-                        "seed": 707070
-                    }
+                    "properties": { "size": 2, "bodyType": "SHELL_CLUSTER", "isWalkable": true, "isEdible": false, "seed": 885522 }
                 }
             ]
         }

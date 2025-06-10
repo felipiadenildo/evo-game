@@ -13,6 +13,8 @@ import java.util.Random;
  * is now also the authority for calculating sprite dimensions.
  */
 public class SpriteGenerator {
+    
+    private static final int PROPORTION = GameConstants.CELL_SIZE - 50;
 
     /**
      * Calculates the render width for a sprite based on its configuration.
@@ -26,13 +28,13 @@ public class SpriteGenerator {
         }
         switch (config.bodyType) {
             case FINNED_AQUATIC:
-                return 8 + config.size * 2; // Ex: Size 1=10px, Size 5=18px
+                return config.size + PROPORTION;
             case BIPED_TERRESTRIAL:
-                return 6 + config.size;
+                return PROPORTION + config.size;
             case MEAT_CHUNK:
-                return 8 + config.size; // Tamanho da carne
+                return PROPORTION + config.size; // Tamanho da carne
             case PORTAL_SPIRAL:
-                return GameConstants.CELL_SIZE;
+                return GameConstants.CELL_SIZE+ 40;
             case TREE:
             case ROCK:
             case BUSH:
@@ -40,9 +42,9 @@ public class SpriteGenerator {
             case FLOWER_PATCH:
             case CORAL:
             case MUSHROOM_CLUSTER:
-                return 12 + config.size * 2;
+                return PROPORTION + config.size * 2;
             default:
-                return 8 + config.size; // Default size for blobs, etc.
+                return PROPORTION + config.size; // Default size for blobs, etc.
         }
     }
 
@@ -58,11 +60,11 @@ public class SpriteGenerator {
         }
         switch (config.bodyType) {
             case FINNED_AQUATIC:
-                return 5 + config.size;
+                return PROPORTION + config.size;
             case BIPED_TERRESTRIAL:
-                return 8 + config.size;
+                return PROPORTION + config.size;
             case MEAT_CHUNK:
-                return 6 + config.size; // Tamanho da carne
+                return PROPORTION + config.size; // Tamanho da carne
             case PORTAL_SPIRAL:
                 return GameConstants.CELL_SIZE;
             case TREE:
@@ -72,9 +74,9 @@ public class SpriteGenerator {
             case FLOWER_PATCH:
             case CORAL:
             case MUSHROOM_CLUSTER:
-                return 12 + config.size * 2;
+                return PROPORTION + config.size * 2;
             default:
-                return 8 + config.size;
+                return PROPORTION + config.size;
         }
     }
 
@@ -450,39 +452,63 @@ public class SpriteGenerator {
     }
 
     /**
-     * Generates an animated, multi-colored spiral sprite.
+     * Gera um sprite de portal animado, com cores que se movem e um efeito de
+     * pulsação.
      *
-     * @param config The configuration for the sprite.
-     * @return A BufferedImage representing the generated portal.
+     * @param config As propriedades do sprite procedural.
+     * @return Uma BufferedImage representando o portal gerado.
      */
     private BufferedImage generatePortalSpiral(ProceduralSpriteComponent config) {
         int width = getWidthFor(config);
         int height = getHeightFor(config);
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        Color[] portalColors = {Color.GREEN, Color.BLUE, Color.YELLOW};
         int centerX = width / 2;
         int centerY = height / 2;
 
-        // Desenha a espiral usando coordenadas polares (r = a * θ)
-        // Loop através do ângulo (theta)
-        for (double theta = 0; theta < 8 * Math.PI; theta += 0.05) {
-            // O raio 'r' aumenta com o ângulo, criando a espiral
-            double r = (width / (16 * Math.PI)) * theta;
+        // Usa o tempo do sistema para animar o portal continuamente
+        long time = System.currentTimeMillis();
+        double timeSeconds = time / 1000.0;
 
-            // Converte de polar para cartesiano
-            int x = (int) (centerX + r * Math.cos(theta));
-            int y = (int) (centerY + r * Math.sin(theta));
+        // Efeito de pulsação suave usando uma onda senoidal
+        double pulse = 0.9 + 0.1 * Math.sin(timeSeconds * 2);
 
-            // Escolhe a cor baseada no quadro de animação e no ângulo, criando o efeito de rotação de cor
-            int colorIndex = (config.animationFrame + (int) (theta / 2)) % portalColors.length;
-            Color pixelColor = portalColors[colorIndex];
+        // Limpa a imagem com um fundo transparente
+        g2d.setComposite(AlphaComposite.Clear);
+        g2d.fillRect(0, 0, width, height);
+        g2d.setComposite(AlphaComposite.SrcOver);
 
-            // Desenha o pixel na imagem, se estiver dentro dos limites
-            if (x >= 0 && x < width && y >= 0 && y < height) {
-                image.setRGB(x, y, pixelColor.getRGB());
+        // Desenha duas espirais para um efeito mais complexo
+        for (double theta = 0; theta < 10 * Math.PI; theta += 0.02) {
+            // Espiral 1: Gira em um sentido
+            double r1 = (width / (22 * Math.PI)) * theta * pulse;
+            float hue1 = (float) (timeSeconds * 0.1 + theta / (10 * Math.PI)) % 1.0f;
+            Color color1 = Color.getHSBColor(hue1, 0.9f, 1.0f);
+
+            int x1 = (int) (centerX + r1 * Math.cos(theta + timeSeconds));
+            int y1 = (int) (centerY + r1 * Math.sin(theta + timeSeconds));
+
+            if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height) {
+                image.setRGB(x1, y1, color1.getRGB());
+            }
+
+            // Espiral 2: Menor e gira no sentido oposto com cor diferente
+            double r2 = (width / (28 * Math.PI)) * theta * pulse;
+            float hue2 = (float) (0.5 + timeSeconds * 0.1 + theta / (10 * Math.PI)) % 1.0f; // Cor oposta no círculo cromático
+            Color color2 = Color.getHSBColor(hue2, 0.8f, 1.0f);
+
+            int x2 = (int) (centerX + r2 * Math.cos(-theta - timeSeconds * 0.8));
+            int y2 = (int) (centerY + r2 * Math.sin(-theta - timeSeconds * 0.8));
+
+            if (x2 >= 0 && x2 < width && y2 >= 0 && y2 < height) {
+                // Usa setRGB para não sobrepor com AlphaComposite.Clear
+                image.setRGB(x2, y2, color2.getRGB());
             }
         }
+
+        g2d.dispose();
         return image;
     }
 

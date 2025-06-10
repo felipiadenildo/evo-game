@@ -1,50 +1,74 @@
 {
-  "levelNumber": 1,
-  "levelName": "The Tidal Pool",
-  "proceduralSeed": 12345,
-  "mapWidth": 60,
-  "mapHeight": 50,
-  "noiseScale": 500.0,
-  "player": {
-    "row": 25,
-    "column": 30,
-    "lives": 3,
-    "properties": {
-      "size": 3,
-      "diet": "OMNIVORE",
-      "bodyType": "FINNED_AQUATIC"
-    }
-  },
-  "biomeRules": [
-    {
-      "biome": "OCEAN_SHALLOW",
-      "spawnables": [
-        {
-          "type": "SkittishNPC",
-          "density": 0.5,
-          "properties": {
-            "size": 2,
-            "speed": 1.8,
-            "bodyType": "FINNED_AQUATIC",
-            "diet": "HERBIVORE"
-          }
-        }
-      ]
-    },
-    {
-      "biome": "FOREST",
-      "spawnables": [
-        {
-          "type": "AggressiveNPC",
-          "density": 0.015,
-          "properties": {
-            "size": 4,
-            "speed": 1.5,
+    "levelNumber": 5,
+    "levelName": "The Frozen Pinnacle",
+    "description": "Uma era do gelo consome o mundo. A vida recua para os vales e luta para sobreviver no frio cortante dos picos. \n Este é o teste final. Prove que você é a forma de vida suprema.",
+    "proceduralSeed": 13579,
+    "mapWidth": 30,
+    "mapHeight": 30,
+    "noiseScale": 400.0,
+    "terrainRules": [
+        { "biome": "GRASSLAND", "maxElevation": 0.1 },
+        { "biome": "FOREST", "maxElevation": 0.4 },
+        { "biome": "TUNDRA", "maxElevation": 0.7 },
+        { "biome": "MOUNTAIN_ROCK", "maxElevation": 0.8 },
+        { "biome": "MOUNTAIN_SNOW", "maxElevation": 1.0 }
+    ],
+    "player": {
+        "row": 15,
+        "column": 15,
+        "lives": 3,
+        "properties": {
+            "size": 6,
+            "diet": "CARNIVORE",
             "bodyType": "BIPED_TERRESTRIAL",
-            "diet": "CARNIVORE"
-          }
+            "seed": 505050
         }
-      ]
-    }
-  ]
+    },
+    "biomeRules": [
+        {
+            "biome": "TUNDRA",
+            "spawnables": [
+                {
+                    "type": "NeutralNPC",
+                    "density": 0.02,
+                    "properties": { "size": 6, "speed": 1.1, "bodyType": "MAMMOTHLIKE", "diet": "HERBIVORE", "seed": 131313 }
+                },
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.01,
+                    "properties": { "size": 5, "bodyType": "ICE_SPIKE", "isWalkable": false, "isEdible": false, "seed": 242424 }
+                }
+            ]
+        },
+        {
+            "biome": "MOUNTAIN_SNOW",
+            "spawnables": [
+                {
+                    "type": "AggressiveNPC",
+                    "density": 0.015,
+                    "properties": { "size": 7, "speed": 1.6, "bodyType": "BIPED_TERRESTRIAL", "diet": "CARNIVORE", "seed": 353535 }
+                },
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.02,
+                    "properties": { "size": 6, "bodyType": "ROCK", "isWalkable": false, "isEdible": false, "seed": 464646 }
+                }
+            ]
+        },
+        {
+            "biome": "FOREST",
+            "spawnables": [
+                 {
+                    "type": "SkittishNPC",
+                    "density": 0.02,
+                    "properties": { "size": 4, "speed": 2.4, "bodyType": "QUADRUPED", "diet": "HERBIVORE", "seed": 575757 }
+                },
+                {
+                    "type": "ProceduralScenery",
+                    "density": 0.025,
+                    "properties": { "size": 6, "bodyType": "PINE_TREE", "isWalkable": false, "isEdible": false, "seed": 686868 }
+                }
+            ]
+        }
+    ]
 }
